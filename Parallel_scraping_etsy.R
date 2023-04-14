@@ -4,58 +4,54 @@ library(tictoc)
 library(furrr)
 
 
-plan(multisession(workers = 5))
-### Poskus parallel scrapinga Brrate
+plan(multisession(workers = 5)) #5 workers was maximum for scraping without errors
+
 ######DIY PLANS
 
 
 plans <- read.csv("diy_plans.csv")
 
-plan(multisession(workers = 5))
-links1 <- plans$link[1:1000]
+links1 <- plans$link[1:1000] #Divided the plans in several batches, because I didn't scrape everything at once.
 links2 <- plans$link[1001:3000]
 links3 <- plans$link[3001:6000]
 links4 <- plans$link[6001:10000]
 links5 <- plans$link[10001:15408]
 
 
-diy_plans1c <- c(diy_plans1, diy_plans2)
-diy_plans2c <- c(diy_plans3, diy_plans4, diy_plans5)
-
 tic()
-diy_plans5 <- future_map(links5, function(x) {
+diy_plans5 <- future_map(links5, function(x) { #Here only the last part was scrapped, adjust accordingly
   page <- read_html(x)
   
   Sys.sleep(rnorm(1, mean = 2, sd = 0.1))
   
   c(
     page %>%
-      html_nodes(".wt-display-inline-flex-xs span.wt-text-caption") %>%
+      html_nodes(".wt-display-inline-flex-xs span.wt-text-caption") %>% #saving number of sales
       html_text() %>%
       str_trim(),
     
     page %>%
-      html_nodes("h2.wt-mr-xs-2.wt-text-body-03") %>%
+      html_nodes("h2.wt-mr-xs-2.wt-text-body-03") %>% #Saving number of reviews
       html_text() %>%
       str_trim(),
     
     page %>%
-      html_nodes("#reviews .wt-align-items-center .wt-display-inline-block") %>%
+      html_nodes("#reviews .wt-align-items-center .wt-display-inline-block") %>% #Saving seller rating
       html_text()%>%
       str_trim(),
     
     page %>%
-      html_nodes("#listing-page-cart .wt-text-body-01 span") %>%
+      html_nodes("#listing-page-cart .wt-text-body-01 span") %>% #Saving seller name
       html_text() %>%
       str_trim()
   )
 })
 toc()
 
+#Everything is saved in lists, which we will reshape later
 
-
-diy_plans_extra <- c(diy_plans1c, diy_plans2c)
-saveRDS(diy_plans_extra, "diy_plans_extra.Rdata")
+#diy_plans_extra <- c(diy_plans1c, diy_plans2c) Joining all of the smaller batches
+saveRDS(diy_plans_extra, "diy_plans_extra.Rdata") #Saving the end list
 
 
 ###### DIY BEDS
@@ -92,7 +88,7 @@ diy_beds2 <- future_map(links2, function(x) {
 })
 toc()
 
-diy_beds_extra <- c(diy_beds1, diy_beds2)
+#diy_beds_extra <- c(diy_beds1, diy_beds2)
 saveRDS(diy_beds_extra, "diy_beds_extra.Rdata")
 
 
@@ -134,12 +130,12 @@ diy_buildplans4 <- future_map(links4, function(x) {
 toc()
 
 
-diy_buildplans_c1 <- c(diy_buildplans1, diy_buildplans2, diy_buildplans3)
+#diy_buildplans_c1 <- c(diy_buildplans1, diy_buildplans2, diy_buildplans3)
 
-saveRDS(diy_buildplans_c1, "diy_buildplans_extra_1.Rdata")
-diy_buildplans_c1 <- readRDS("diy_buildplans_extra_1.Rdata")
+#saveRDS(diy_buildplans_c1, "diy_buildplans_extra_1.Rdata")
+#diy_buildplans_c1 <- readRDS("diy_buildplans_extra_1.Rdata")
 
-diy_buildplans_extra <- c(diy_buildplans_c1, diy_buildplans4)
+#diy_buildplans_extra <- c(diy_buildplans_c1, diy_buildplans4)
 
 saveRDS(diy_buildplans_extra, "diy_buildplans_extra.Rdata")
 
@@ -182,10 +178,10 @@ diy_blueprints5 <- future_map(links5, function(x) {
 toc()
 
 
-diy_blueprints_extra_1 <- c(diy_blueprints1, diy_blueprints2, diy_blueprints3, diy_blueprints4)
+#diy_blueprints_extra_1 <- c(diy_blueprints1, diy_blueprints2, diy_blueprints3, diy_blueprints4)
 
-diy_blueprints_extra_1 <- readRDS("diy_blueprint_extra_1.Rdata")
-diy_blueprints_extra <- c(diy_blueprints_extra_1, diy_blueprints5)
+#diy_blueprints_extra_1 <- readRDS("diy_blueprint_extra_1.Rdata")
+#diy_blueprints_extra <- c(diy_blueprints_extra_1, diy_blueprints5)
 
 saveRDS(diy_blueprints_extra, "diy_blueprint_extra.Rdata")
 
@@ -260,12 +256,12 @@ diy_furniture3 <- future_map(links3, function(x) {
 })
 toc()
 
-diy_furniture_extra_1 <- c(diy_furniture1, diy_furniture2)
+#diy_furniture_extra_1 <- c(diy_furniture1, diy_furniture2)
 
-saveRDS(diy_furniture_extra_1, "diy_furniture_extra_1.Rdata")
+#saveRDS(diy_furniture_extra_1, "diy_furniture_extra_1.Rdata")
 
-diy_furniture_extra_1 <- readRDS("diy_furniture_extra_1.Rdata")
+#diy_furniture_extra_1 <- readRDS("diy_furniture_extra_1.Rdata")
 
-diy_furniture_extra <- c(diy_furniture_extra_1, diy_furniture3)
+#diy_furniture_extra <- c(diy_furniture_extra_1, diy_furniture3)
 
 saveRDS(diy_furniture_extra, "diy_furniture_extra.Rdata")
